@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Simulation.GUI;
+
+namespace Simulation.Tiles
+{
+    public class SandboxTile : ITile
+    {
+        private Vector2 _location;
+        public SandboxTile(int x, int y)
+        {
+            _location = new Vector2(x, y);
+        }
+
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 tipLocation, Vector2 centerTile)
+        {
+            Vector2[] vertice = new Vector2[4];
+            vertice[0] = tipLocation;
+            vertice[1] = tipLocation + new Vector2(-24, 12);
+            vertice[2] = tipLocation + new Vector2(0, 24);
+            vertice[3] = tipLocation + new Vector2(24, 12);
+
+            spriteBatch.DrawLine(vertice[0], vertice[3], (centerTile == _location ? Color.LimeGreen : Color.Gray));
+            spriteBatch.DrawLine(vertice[3], vertice[2], (centerTile == _location ? Color.LimeGreen : Color.Gray));
+            spriteBatch.DrawLine(vertice[2], vertice[1], (centerTile == _location ? Color.LimeGreen : Color.Gray));
+            spriteBatch.DrawLine(vertice[1], vertice[0], (centerTile == _location ? Color.LimeGreen : Color.Gray));
+
+            Vector2 thingToWrite =
+                (Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Space) ? centerTile : _location);
+            spriteBatch.DrawString(thingToWrite.X.ToString() + ", " + thingToWrite.Y.ToString(),
+                tipLocation + new Vector2(-11, 4), Color.White);
+        }
+        public void Update(GameTime gameTime, PlayerGame playerGame)
+        {
+        }
+    }
+}

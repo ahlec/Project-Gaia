@@ -1,0 +1,52 @@
+Content\Arial.xnb
+Content\GUI\guiFont.xnb
+Content\GUI\tooltipFont.xnb
+Content\fonts\Size10.xnb
+Content\fonts\Size13.xnb
+Content\fonts\Size10Bold.xnb
+Content\isometric_tile.xnb
+Content\GUI\interface.xnb
+Content\buildings\building1.xnb
+Content\buildings\bank1.xnb
+Content\buildings\company1.xnb
+Content\buildings\factory1.xnb
+Content\buildings\hospital1.xnb
+Content\buildings\house1.xnb
+Content\graphics\food icon.xnb
+Content\graphics\money icon.xnb
+Content\graphics\euro.xnb
+Content\graphics\apple.xnb
+Content\graphics\gold bar.xnb
+Content\graphics\simple_grass.xnb
+Content\graphics\water.xnb
+Content\graphics\blank tile.xnb
+Content\graphics\close.xnb
+Content\GUI\interface 2.xnb
+Content\graphics\oil.xnb
+Content\research\lightbulb.xnb
+Content\GUI\skins\progress-bar-back-empty.xnb
+Content\GUI\skins\progress-bar-transition.xnb
+Content\GUI\skins\progress-bar-left-end.xnb
+Content\GUI\skins\progress-bar-right-end.xnb
+Content\GUI\skins\progress-bar-back-progress.xnb
+Content\GUI\skins\dialog-title-right-end.xnb
+Content\GUI\skins\dialog-title-background.xnb
+Content\GUI\skins\dialog-title-left-end.xnb
+Content\GUI\skins\dialog-title-close.xnb
+Content\GUI\skins\dialog-bottom-left.xnb
+Content\GUI\skins\dialog-bottom-right.xnb
+Content\GUI\skins\dialog-bottom.xnb
+Content\GUI\skins\dialog-left.xnb
+Content\GUI\skins\dialog-right.xnb
+Content\GUI\skins\dialog-background.xnb
+Content\research\happy_piggies.xnb
+Content\graphics\new.xnb
+Content\buildings\tiles\skyscraper.xnb
+Content\buildings\skyscraper-icon.xnb
+Content\buildings\tiles\community.xnb
+Content\buildings\community-icon.xnb
+Content\graphics\money_bag.xnb
+Content\buildings\tiles\school1_trans.xnb
+Content\graphics\electricity.xnb
+Content\graphics\bread.xnb
+Content\graphics\Barrel.xnb

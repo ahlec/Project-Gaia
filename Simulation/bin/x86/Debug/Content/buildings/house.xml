@@ -1,0 +1,6 @@
+<Building>
+  <Name>House</Name>
+  <BaseEcoFactor>1</BaseEcoFactor>
+  <BaseCost>1000</BaseCost>
+  <Icon>buildings\house1</Icon>
+</Building>

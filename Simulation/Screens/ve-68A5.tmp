@@ -1,0 +1,432 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Simulation.Buildings;
+using Simulation.GUI;
+using Simulation.ResearchLabs;
+using Simulation.Maps;
+using Microsoft.Xna.Framework.Input;
+using Simulation.Graphics;
+
+namespace Simulation.Screens
+{
+    public class SimulationScreen : IScreen
+    {
+        private PlayerGame _playerGame;
+        private SimulationScreenMap _currentMap = SimulationScreenMap.Urban;   
+        private Rectangle mapWindow, minimapWindow;
+        private string outputText = null;
+        private int availableBuildingListOffset = 0;
+        protected ApplicationSkin skin;
+        protected SimulationScreenControls controls;
+        private Rectangle[] interfaceBlocks;
+        private Vector2[] minimapVertices;
+
+        public void Initialize(Game game, ApplicationSkin applicationSkin, PlayerGame playerGame)
+        {
+            interfaceBlocks = new Rectangle[3];
+            interfaceBlocks[0] = new Rectangle(0, 0, 144, 568);
+            interfaceBlocks[1] = new Rectangle(0, 568, 1050, 133);
+            interfaceBlocks[2] = new Rectangle(877, 376, 173, 192);
+
+            _playerGame = playerGame;
+            _playerGame.UrbanMap.TileClicked += new Map.TileClickedHandler(TileClicked);
+            _playerGame.UrbanMap.BuildingPlacementBegan += new BuildingPlacementBeganHandler(BuildingPlacementBegins);
+            _playerGame.UrbanMap.BuildingPlacementFinished += new BuildingPlacementFinishedHandler(BuildingPlacementEnds);
+            _playerGame.UrbanMap.BuildingSelected += new BuildingSelectedHandler(BuildingSelected);
+            _playerGame.CountryMap.TileClicked += new Map.TileClickedHandler(TileClicked);
+            _playerGame.CountryMap.BuildingPlacementBegan += new BuildingPlacementBeganHandler(BuildingPlacementBegins);
+            _playerGame.CountryMap.BuildingPlacementFinished += new BuildingPlacementFinishedHandler(BuildingPlacementEnds);
+            _playerGame.CountryMap.BuildingSelected += new BuildingSelectedHandler(BuildingSelected);
+            _playerGame.OceanMap.TileClicked += new Map.TileClickedHandler(TileClicked);
+            _playerGame.OceanMap.BuildingPlacementBegan += new BuildingPlacementBeganHandler(BuildingPlacementBegins);
+            _playerGame.OceanMap.BuildingPlacementFinished += new BuildingPlacementFinishedHandler(BuildingPlacementEnds);
+            _playerGame.OceanMap.BuildingSelected += new BuildingSelectedHandler(BuildingSelected);
+
+            skin = applicationSkin;
+            controls = new SimulationScreenControls(game, applicationSkin);
+            controls.UrbanAreaSelection.Toggled += new EventHandler(areaSelectionToggled);
+            controls.CountryAreaSelection.Toggled += new EventHandler(areaSelectionToggled);
+            controls.OceanAreaSelection.Toggled += new EventHandler(areaSelectionToggled);
+
+            controls.BuildingListLeft.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftBuildingList(-1); };
+            controls.BuildingListRight.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftBuildingList(1); };
+
+            controls.BuildingListLeft.Enabled = false;
+            controls.MoneyLabel.Text = playerGame.Money.ToString();
+            controls.FoodLabel.Text = playerGame.Food.ToString();
+            controls.OilLabel.Text = playerGame.Oil.ToString();
+
+            controls.MinimapEast.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftViewport(new Vector2(0, 1)); };
+            controls.MinimapNorth.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftViewport(new Vector2(-1, 0)); };
+            controls.MinimapSouth.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftViewport(new Vector2(1, 0)); };
+            controls.MinimapWest.OnClick += delegate(ScreenItem item, MouseEventArgs args) { ShiftViewport(new Vector2(0, -1)); };
+
+            foreach (Research research in playerGame.AvailableResearches)
+                controls.TechnologyList.Items.Add(new ScreenItemListItem(research.Name, research));
+            controls.TechnologyList.ListItemSelected += new ScreenItemList.ListItemSelectedHandler(TechnologyListItemSelected);
+            foreach (Building building in playerGame.AvailableBuildings)
+                controls.BuildingDropdown.Items.Add(new ScreenItemListItem(building.Name));
+            controls.BuildingDropdown.ListItemSelected += delegate(ScreenItemList list, ScreenItemListItem item)
+            {
+                OpenBuildingDialog(_playerGame.AvailableBuildings[list.Items.IndexOf(item)]);
+            };
+            int buttonIdentity = 0;
+            foreach (ScreenItemButton button in controls.BuildingListButtons)
+            {
+                button.AttachedInformation = buttonIdentity;
+                buttonIdentity++;
+                button.OnClick += delegate(ScreenItem item, MouseEventArgs args)
+                {
+                    OpenBuildingDialog(_playerGame.AvailableBuildings[availableBuildingListOffset +
+                           (int)item.AttachedInformation]);
+                };
+            }
+
+            int upperBounds = (playerGame.AvailableBuildings.Count > 6 ? 6 : playerGame.AvailableBuildings.Count);
+            for (int index = 0; index < upperBounds; index++)
+                controls.BuildingListButtons[index].Image = playerGame.AvailableBuildings[index].BuildingIcon;
+
+            if (playerGame.AvailableBuildings.Count <= 6)
+            {
+                for (int index = playerGame.AvailableBuildings.Count; index < controls.BuildingListButtons.Count; index++)
+                    controls.BuildingListButtons[index].Enabled = false;
+                controls.BuildingListRight.Enabled = false;
+            }
+
+            mapWindow = new Rectangle(151, 0, game.GraphicsDevice.Viewport.Width - 151,
+                game.GraphicsDevice.Viewport.Height - 133);
+            minimapWindow = new Rectangle(967, 438, GlobalSettings.MinimapWidth, GlobalSettings.MinimapHeight);
+            minimapVertices = new Vector2[4];
+            minimapVertices[0] = Vector2.Zero;
+            minimapVertices[1] = new Vector2(GlobalSettings.MinimapWidth, 0);
+            minimapVertices[2] = new Vector2(GlobalSettings.MinimapWidth, GlobalSettings.MinimapHeight);
+            minimapVertices[3] = new Vector2(0, GlobalSettings.MinimapHeight);
+            for (int vertex = 0; vertex < 4; vertex++)
+            {
+                Vector2 originalVertice = minimapVertices[vertex];
+                minimapVertices[vertex].X = (float)(originalVertice.X * Math.Cos(MathHelper.PiOver4) -
+                    originalVertice.Y * Math.Sin(MathHelper.PiOver4)) + minimapWindow.X;
+                minimapVertices[vertex].Y = (float)(originalVertice.X * Math.Sin(MathHelper.PiOver4) +
+                    originalVertice.Y * Math.Cos(MathHelper.PiOver4)) + minimapWindow.Y;
+            }
+
+            controls.SelectedBuilding.OnClick += delegate(ScreenItem item, MouseEventArgs args)
+            {
+                if (((ScreenItemBuildingInformation)item).Building == null)
+                    return;
+                switch (_currentMap)
+                {
+                    case SimulationScreenMap.Urban: _playerGame.UrbanMap.CenterTile = ((ScreenItemBuildingInformation)item).Building.MapLocation; break;
+                    case SimulationScreenMap.Country: _playerGame.CountryMap.CenterTile = ((ScreenItemBuildingInformation)item).Building.MapLocation; break;
+                    case SimulationScreenMap.Ocean: _playerGame.OceanMap.CenterTile = ((ScreenItemBuildingInformation)item).Building.MapLocation; break;
+                }
+            };
+         }
+
+        public void ShiftViewport(Vector2 direction)
+        {
+            Map map = null;
+            switch (_currentMap)
+            {
+                case SimulationScreenMap.Urban: map = _playerGame.UrbanMap; break;
+                case SimulationScreenMap.Country: map = _playerGame.CountryMap; break;
+                case SimulationScreenMap.Ocean: map = _playerGame.OceanMap; break;
+            }
+            Vector2 targetTile = map.CenterTile + direction;
+            if (targetTile.X < 0)
+                targetTile.X = 0;
+            if (targetTile.Y < 0)
+                targetTile.Y = 0;
+            if (targetTile.X >= map.Width)
+                targetTile.X = map.Width - 1;
+            if (targetTile.Y >= map.Height)
+                targetTile.Y = map.Height - 1;
+            map.CenterTile = targetTile;
+        }
+
+        private void BuildingPlacementBegins(Building building, Map map)
+        {
+            foreach (ScreenItemButton button in controls.BuildingListButtons)
+                button.Enabled = false;
+            controls.BuildingDropdown.Enabled = false;
+            controls.TechnologyList.Enabled = false;
+            controls.BuildingListRight.Enabled = false;
+            controls.BuildingListLeft.Enabled = false;
+        }
+        private void BuildingPlacementEnds(Building building, Map map)
+        {
+            foreach (ScreenItemButton button in controls.BuildingListButtons)
+                button.Enabled = true;
+            controls.BuildingDropdown.Enabled = true;
+            controls.TechnologyList.Enabled = true;
+            controls.BuildingListRight.Enabled = true;
+            controls.BuildingListLeft.Enabled = true;
+        }
+        private void BuildingSelected(Building building, Map map)
+        {
+            controls.SelectedBuilding.Building = building;
+        }
+
+        protected virtual void TileClicked(Map map, TileClickedEventArgs args)
+        {
+            if (map.PlacingBuilding)
+            {
+                if (map.BuildingPlacementInfo.CanPlace)
+                    map.EndBuildingPlacement(args.Tile.Location);
+                else
+                    throw new NotImplementedException();
+            } else
+                map.CenterTile = args.Tile.Location;
+        }
+        private void OpenBuildingDialog(Building building)
+        {
+            ScreenItemDialog buildingDialog = new ScreenItemDialog(controls.Game, skin,
+                 building.Name, true);
+            buildingDialog.AttachedInformation = building;
+            buildingDialog.Items.Add(new ScreenItemImage(controls.Game, skin, 5, 5, 16, 16, "MoneyIcon"));
+            buildingDialog.Items.Add(new ScreenItemLabel(controls.Game, skin, 25, 3, 13, 73, 16,
+                building.CostMoney.ToString(), ScreenItemTextAlignment.Left));
+            buildingDialog.Items.Add(new ScreenItemImage(controls.Game, skin, 6, 22, 16, 16, "FoodIcon"));
+            buildingDialog.Items.Add(new ScreenItemLabel(controls.Game, skin, 25, 20, 13, 73, 16,
+                building.CostFood.ToString(), ScreenItemTextAlignment.Left));
+            buildingDialog.Items.Add(new ScreenItemImage(controls.Game, skin, 5, 39, 16, 16, "MetalIcon"));
+            ScreenItemButton placeBuilding = new ScreenItemButton(controls.Game, skin, 100, 5, 75, 20,
+                "Build");
+            buildingDialog.Items.Add(new ScreenItemLabel(controls.Game, skin, 5, 53, 10, 250, building.Description));
+            //if (building.CostMoney > _playerGame.Money || building.CostFood > _playerGame.Food)
+            //    placeBuilding.Enabled = false;
+            placeBuilding.OnClick += delegate(ScreenItem item, MouseEventArgs args)
+            {
+                Map currentMap = null;
+                switch (_currentMap)
+                {
+                    case SimulationScreenMap.Urban: currentMap = _playerGame.UrbanMap; break;
+                    case SimulationScreenMap.Country: currentMap = _playerGame.CountryMap; break;
+                    case SimulationScreenMap.Ocean: currentMap = _playerGame.OceanMap; break;
+                }
+                buildingDialog.Close();
+                currentMap.BeginBuildingPlacement(building);
+            };
+            buildingDialog.Items.Add(placeBuilding);
+            controls.OpenDialog = buildingDialog;
+            buildingDialog.Closed += delegate()
+            {
+                controls.OpenDialog = null;
+            };
+        }
+        private void TechnologyListItemSelected(ScreenItemList list, ScreenItemListItem item)
+        {
+            if (_playerGame.CurrentResearch.Count >= 3)
+            {
+                return;
+            }
+            Research research = (Research)item.AttachedInformation;
+
+            ScreenItemDialog researchDialog = new ScreenItemDialog(controls.Game, skin,
+                 research.Name, true);
+            researchDialog.AttachedInformation = research;
+            researchDialog.Items.Add(new ScreenItemImage(controls.Game, skin, 250, 5, research.Icon));
+            ScreenItemButton researchButton = new ScreenItemButton(controls.Game, skin, 250 +
+                (float)((research.Icon.Width - 125) / 2), research.Icon.Height + 10, 125, 20, "Begin Research");
+            researchDialog.OnClick += delegate(ScreenItem screenItem, MouseEventArgs args)
+            {
+                item.Enabled = false;
+                _playerGame.BeginResearch(research);
+                researchDialog.Close();
+            };
+            researchDialog.Items.Add(researchButton);
+            ScreenItemLabel description = new ScreenItemLabel(controls.Game, skin, 5, 5, 10, 240, research.Description);
+            description.TextAlignment = ScreenItemTextAlignment.Center;
+            researchDialog.Items.Add(description);
+            controls.OpenDialog = researchDialog;
+            researchDialog.Closed += delegate() { controls.OpenDialog = null; };
+        }
+
+        private void ShiftBuildingList(int direction)
+        {
+            int newOffset = availableBuildingListOffset + direction;
+            if (newOffset < 0 || newOffset + 6 > _playerGame.AvailableBuildings.Count)
+                return;
+            controls.BuildingListLeft.Enabled = (newOffset != 0);
+            controls.BuildingListRight.Enabled = (newOffset + 6 < _playerGame.AvailableBuildings.Count);
+            int upperBounds = (_playerGame.AvailableBuildings.Count > 6 ? 6 : _playerGame.AvailableBuildings.Count);
+            for (int button = 0; button < upperBounds; button++)
+                controls.BuildingListButtons[button].Image = _playerGame.AvailableBuildings[newOffset + button].BuildingIcon;
+            availableBuildingListOffset = newOffset;
+        }
+
+        void areaSelectionToggled(object sender, EventArgs e)
+        {
+            ScreenItemToggleButton sndr = (ScreenItemToggleButton)sender;
+            if (sndr == controls.UrbanAreaSelection)
+            {
+                _currentMap = SimulationScreenMap.Urban;
+                controls.SelectedBuilding.Building = _playerGame.UrbanMap.CurrentlySelectedBuilding;
+            }
+            else if (sndr == controls.CountryAreaSelection)
+            {
+                _currentMap = SimulationScreenMap.Country;
+                controls.SelectedBuilding.Building = _playerGame.CountryMap.CurrentlySelectedBuilding;
+            }
+            else if (sndr == controls.OceanAreaSelection)
+            {
+                _currentMap = SimulationScreenMap.Ocean;
+                controls.SelectedBuilding.Building = _playerGame.OceanMap.CurrentlySelectedBuilding;
+            }
+        }
+
+        public void Update(GameTime gameTime, ref PlayerGame playerGame)
+        {
+            _playerGame = playerGame;
+            List<ScreenItem> orderedScreenItems = controls.List.OrderByDescending<ScreenItem,
+                int>(item => item.Layer).ToList<ScreenItem>();
+            bool stillProcessingMouse = true;
+            foreach (ScreenItem screenItem in orderedScreenItems)
+            {
+                if (screenItem == null)
+                    continue;
+                if (screenItem.Enabled && stillProcessingMouse)
+                {
+                    stillProcessingMouse = !screenItem.ProcessUpdateMouse();
+                }
+                screenItem.Update(gameTime);
+            }
+            MouseState mouseState = Mouse.GetState();
+            controls.MoneyLabel.Text = ((int)Math.Floor(playerGame.Money)).ToString();
+            controls.FoodLabel.Text = ((int)Math.Floor(playerGame.Food)).ToString();
+            controls.OilLabel.Text = ((int)Math.Floor(playerGame.Oil)).ToString();
+
+            foreach (ResearchProgress researchProgress in playerGame.CurrentResearch)
+                researchProgress.Update(gameTime);
+
+            Map loadedMap = null;
+            switch (_currentMap)
+            {
+                case SimulationScreenMap.Urban: loadedMap = _playerGame.UrbanMap; break;
+                case SimulationScreenMap.Country: loadedMap = _playerGame.CountryMap; break;
+                case SimulationScreenMap.Ocean: loadedMap = _playerGame.OceanMap; break;
+            }
+            loadedMap.output = null;
+            if (stillProcessingMouse && minimapVertices.PointInside(new Vector2(mouseState.X, mouseState.Y)))
+            {
+                loadedMap.ProcessMinimapMouse(new Vector2(minimapWindow.X - minimapWindow.Width / 2,
+                    minimapWindow.Y - minimapWindow.Height / 2));
+                stillProcessingMouse = false;
+            }
+            outputText = "";
+            if (loadedMap.output != null)
+                outputText = loadedMap.output;
+            
+            if (stillProcessingMouse)
+                foreach (Rectangle interfaceRectangle in interfaceBlocks)
+                {
+                    if (mouseState.X >= interfaceRectangle.X && mouseState.Y >= interfaceRectangle.Y &&
+                        mouseState.X <= interfaceRectangle.Right && mouseState.Y <= interfaceRectangle.Bottom)
+                        stillProcessingMouse = false;
+                }
+
+            Microsoft.Xna.Framework.Input.KeyboardState _state = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            Vector2 centerTile = loadedMap.CenterTile;
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
+            {
+                centerTile.X++;
+                centerTile.Y--;
+            }
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
+            {
+                centerTile.X--;
+                centerTile.Y++;
+            }
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
+            {
+                centerTile.X--;
+                centerTile.Y--;
+            }
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
+            {
+                centerTile.X++;
+                centerTile.Y++;
+            }
+            if (centerTile.X < 0)
+                centerTile.X = 0;
+            if (centerTile.X >= loadedMap.Width)
+                centerTile.X = loadedMap.Width - 1;
+            if (centerTile.Y < 0)
+                centerTile.Y = 0;
+            if (centerTile.Y >= loadedMap.Height)
+                centerTile.Y = loadedMap.Height - 1;
+            loadedMap.CenterTile = centerTile;
+            loadedMap.Update(gameTime, playerGame, mapWindow, stillProcessingMouse);
+        }
+
+        public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+        {
+            Map currentMap = null;
+            switch (_currentMap)
+            {
+                case SimulationScreenMap.Urban:
+                    currentMap = _playerGame.UrbanMap;
+                    break;
+                case SimulationScreenMap.Country:
+                    currentMap = _playerGame.CountryMap;
+                    break;
+                case SimulationScreenMap.Ocean:
+                    currentMap = _playerGame.OceanMap;
+                    break;
+            }
+            graphicsDevice.Clear(currentMap.BackgroundColor);
+            currentMap.Draw(gameTime, spriteBatch, mapWindow, skin);
+            if (currentMap.BuildingPlacementInfo != null)
+            {
+                Vector2 currentReasonLocation = new Vector2(GlobalSettings.ScreenWidth - 250, 100);
+                foreach (string cannotPlaceReason in currentMap.BuildingPlacementInfo.ReasonsCannotPlace)
+                {
+                    string reason = "• " + cannotPlaceReason;
+                    string[] lines = skin.Fonts[13].WordWrap(reason, 240);
+                    foreach (string line in lines)
+                    {
+                        spriteBatch.DrawString(skin.Fonts[13], line, currentReasonLocation, Color.Red);
+                        currentReasonLocation.Y += skin.Fonts[13].MeasureString(line).Y;
+                    }
+                }
+            }
+
+            /* Interface/Backdrops */
+            spriteBatch.Draw(skin.SimulationScreenInterface, new Rectangle(0, 0, GlobalSettings.ScreenWidth,
+                GlobalSettings.ScreenHeight), Color.White);
+
+            /* Minimap */
+            spriteBatch.Draw(currentMap.Minimap, minimapWindow, null, Color.White, MathHelper.PiOver4,
+                Vector2.Zero, SpriteEffects.None, 0);
+
+            /* Screen Items */
+            if (outputText != null)
+                spriteBatch.DrawString(outputText, new Vector2(mapWindow.X + 10, 
+                    mapWindow.Y + 10), Color.Black);
+
+            List<ScreenItem> orderedScreenItems = controls.List.OrderBy<ScreenItem, int>(item => item.Layer).ToList<ScreenItem>();
+            List<ScreenItem> itemsDrawTooltips = new List<ScreenItem>();
+            foreach (ScreenItem screenItem in orderedScreenItems)
+            {
+                if (screenItem == null)
+                    continue;
+                screenItem.Draw(gameTime, spriteBatch);
+                if (screenItem.GetMouseOver() && screenItem.HasTooltip)
+                    itemsDrawTooltips.Add(screenItem);
+            }
+            foreach (ScreenItem screenItem in itemsDrawTooltips)
+                screenItem.DrawTooltip(spriteBatch, graphicsDevice);
+        }
+    }
+
+    public enum SimulationScreenMap
+    {
+        Urban,
+        Country,
+        Ocean
+    }
+}

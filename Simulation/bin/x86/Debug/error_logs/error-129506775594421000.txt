@@ -1,0 +1,22 @@
+Date: Monday, 23 May, 2011
+
+Time: 10:25:59 PM
+
+
+System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values.
+   at Simulation.Maps.Map.set_CenterTile(Vector2 value) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Maps\Map.cs:line 56
+   at Simulation.Maps.Map.ProcessMinimapMouse(Vector2 minimapTopLeft) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Maps\Map.cs:line 126
+   at Simulation.Screens.SimulationScreen.Update(GameTime gameTime, PlayerGame& playerGame) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Screens\SimulationScreen.cs:line 379
+   at Simulation.Simulation.Update(GameTime gameTime) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Simulation.cs:line 72
+   at Microsoft.Xna.Framework.Game.Tick()
+   at Microsoft.Xna.Framework.Game.HostIdle(Object sender, EventArgs e)
+   at Microsoft.Xna.Framework.GameHost.OnIdle()
+   at Microsoft.Xna.Framework.WindowsGameHost.ApplicationIdle(Object sender, EventArgs e)
+   at System.Windows.Forms.Application.ThreadContext.System.Windows.Forms.UnsafeNativeMethods.IMsoComponent.FDoIdle(Int32 grfidlef)
+   at System.Windows.Forms.Application.ComponentManager.System.Windows.Forms.UnsafeNativeMethods.IMsoComponentManager.FPushMessageLoop(Int32 dwComponentID, Int32 reason, Int32 pvLoopData)
+   at System.Windows.Forms.Application.ThreadContext.RunMessageLoopInner(Int32 reason, ApplicationContext context)
+   at System.Windows.Forms.Application.ThreadContext.RunMessageLoop(Int32 reason, ApplicationContext context)
+   at System.Windows.Forms.Application.Run(Form mainForm)
+   at Microsoft.Xna.Framework.WindowsGameHost.Run()
+   at Microsoft.Xna.Framework.Game.Run()
+   at Simulation.Program.Main(String[] args) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Program.cs:line 21

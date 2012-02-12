@@ -1,0 +1,20 @@
+Date: Monday, 23 May, 2011
+
+Time: 10:20:09 PM
+
+
+Microsoft.Xna.Framework.Content.ContentLoadException: Error loading "buildings\tiles\community2". File not found. ---> System.IO.FileNotFoundException: Could not find file 'C:\Users\Jacob\Dropbox\Simulation\Simulation\bin\x86\Debug\Content\buildings\tiles\community2.xnb'.
+File name: 'C:\Users\Jacob\Dropbox\Simulation\Simulation\bin\x86\Debug\Content\buildings\tiles\community2.xnb'
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share)
+   at Microsoft.Xna.Framework.Content.ContentManager.OpenStream(String assetName)
+   --- End of inner exception stack trace ---
+   at Microsoft.Xna.Framework.Content.ContentManager.OpenStream(String assetName)
+   at Microsoft.Xna.Framework.Content.ContentManager.ReadAsset[T](String assetName, Action`1 recordDisposableObject)
+   at Microsoft.Xna.Framework.Content.ContentManager.Load[T](String assetName)
+   at Simulation.Buildings.Building.Load(XElement xElement, Game game) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Buildings\Building.cs:line 61
+   at Simulation.Buildings.BuildingCatalog.Load(String filepath, Game game) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Buildings\BuildingCatalog.cs:line 20
+   at Simulation.Simulation.Initialize() in C:\Users\Jacob\Dropbox\Simulation\Simulation\Simulation.cs:line 42
+   at Microsoft.Xna.Framework.Game.Run()
+   at Simulation.Program.Main(String[] args) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Program.cs:line 21

@@ -1,0 +1,40 @@
+<ApplicationSkin>
+  <SimulationScreenInterface>GUI\interface 2</SimulationScreenInterface>
+  <Font>GUI\guiFont</Font>
+  <TooltipFont>GUI\tooltipFont</TooltipFont>
+  <Graphics>
+    <Graphic Handle="FoodIcon">graphics\apple</Graphic>
+    <Graphic Handle="MoneyIcon">graphics\euro</Graphic>
+    <Graphic Handle="MetalIcon">graphics\gold bar</Graphic>
+    <Graphic Handle="Grass" Color="0,255,0">graphics\simple_grass</Graphic>
+    <Graphic Handle="Water" Color="0,0,255">graphics\water</Graphic>
+    <Graphic Handle="BlankTile" Color="255,255,255">graphics\blank tile</Graphic>
+    <Graphic Handle="Close">graphics\close</Graphic>
+    <Graphic Handle="Oil">graphics\oil</Graphic>
+  </Graphics>
+  <Fonts>
+    <Font Size="10">fonts\Size10</Font>
+    <Font Size="13">fonts\Size13</Font>
+  </Fonts>
+  <ScreenItemSkin Type="ProgressBar" Handle="Default">
+    <Asset Type="Integer" Handle="Height">25</Asset>
+    <Asset Type="Texture" Handle="EmptyProgress">GUI\skins\progress-bar-back-empty</Asset>
+    <Asset Type="Vector" Handle="LeftOffset">20,0</Asset>
+    <Asset Type="Texture" Handle="Transition">GUI\skins\progress-bar-transition</Asset>
+    <Asset Type="Texture" Handle="LeftEnd">GUI\skins\progress-bar-left-end</Asset>
+    <Asset Type="Texture" Handle="RightEnd">GUI\skins\progress-bar-right-end</Asset>
+    <Asset Type="Texture" Handle="Progress">GUI\skins\progress-bar-back-progress</Asset>
+  </ScreenItemSkin>
+  <ScreenItemSkin Type="Dialog" Handle="Default">
+    <Asset Type="Integer" Handle="TitleBarHeight">24</Asset>
+    <Asset Type="Texture" Handle="TitleRightEnd">GUI\skins\dialog-title-right-end</Asset>
+    <Asset Type="Texture" Handle="TitleBarBackground">GUI\skins\dialog-title-background</Asset>
+    <Asset Type="Texture" Handle="TitleLeftEnd">GUI\skins\dialog-title-left-end</Asset>
+    <Asset Type="Texture" Handle="TitleCloseButton">GUI\skins\dialog-title-close</Asset>
+    <Asset Type="Texture" Handle="BottomLeft">GUI\skins\dialog-bottom-left</Asset>
+    <Asset Type="Texture" Handle="BottomRight">GUI\skins\dialog-bottom-right</Asset>
+    <Asset Type="Texture" Handle="Bottom">GUI\skins\dialog-bottom</Asset>
+    <Asset Type="Texture" Handle="Left">GUI\skins\dialog-left</Asset>
+    <Asset Type="Texture" Handle="Right">GUI\skins\dialog-right</Asset>
+  </ScreenItemSkin>
+</ApplicationSkin>

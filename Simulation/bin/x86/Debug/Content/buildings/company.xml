@@ -1,0 +1,8 @@
+<Buildings>
+  <Building>
+    <Name>Company</Name>
+    <BaseEcoFactor>1</BaseEcoFactor>
+    <BaseCost>1000</BaseCost>
+    <Icon>buildings\company1</Icon>
+  </Building>
+</Buildings>

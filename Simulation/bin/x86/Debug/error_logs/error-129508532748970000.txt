@@ -1,0 +1,26 @@
+Date: Wednesday, 25 May, 2011
+
+Time: 11:14:34 PM
+
+
+System.Collections.Generic.KeyNotFoundException: The given key was not present in the dictionary.
+   at System.ThrowHelper.ThrowKeyNotFoundException()
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at Simulation.GUI.ScreenItemImage..ctor(Game game, ApplicationSkin skin, Int32 x, Int32 y, Int32 width, Int32 height, String graphicHandle) in C:\Users\Jacob\Dropbox\Simulation\Simulation\GUI\ScreenItemImage.cs:line 25
+   at Simulation.Screens.SimulationScreen.OpenBuildingDialog(Building building) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Screens\SimulationScreen.cs:line 261
+   at Simulation.Screens.SimulationScreen.<Initialize>b__b(ScreenItem item, MouseEventArgs args) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Screens\SimulationScreen.cs:line 90
+   at Simulation.GUI.ScreenItem.ProcessUpdateMouse() in C:\Users\Jacob\Dropbox\Simulation\Simulation\GUI\ScreenItem.cs:line 109
+   at Simulation.Screens.SimulationScreen.Update(GameTime gameTime, PlayerGame& playerGame) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Screens\SimulationScreen.cs:line 364
+   at Simulation.Simulation.Update(GameTime gameTime) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Simulation.cs:line 72
+   at Microsoft.Xna.Framework.Game.Tick()
+   at Microsoft.Xna.Framework.Game.HostIdle(Object sender, EventArgs e)
+   at Microsoft.Xna.Framework.GameHost.OnIdle()
+   at Microsoft.Xna.Framework.WindowsGameHost.ApplicationIdle(Object sender, EventArgs e)
+   at System.Windows.Forms.Application.ThreadContext.System.Windows.Forms.UnsafeNativeMethods.IMsoComponent.FDoIdle(Int32 grfidlef)
+   at System.Windows.Forms.Application.ComponentManager.System.Windows.Forms.UnsafeNativeMethods.IMsoComponentManager.FPushMessageLoop(Int32 dwComponentID, Int32 reason, Int32 pvLoopData)
+   at System.Windows.Forms.Application.ThreadContext.RunMessageLoopInner(Int32 reason, ApplicationContext context)
+   at System.Windows.Forms.Application.ThreadContext.RunMessageLoop(Int32 reason, ApplicationContext context)
+   at System.Windows.Forms.Application.Run(Form mainForm)
+   at Microsoft.Xna.Framework.WindowsGameHost.Run()
+   at Microsoft.Xna.Framework.Game.Run()
+   at Simulation.Program.Main(String[] args) in C:\Users\Jacob\Dropbox\Simulation\Simulation\Program.cs:line 21

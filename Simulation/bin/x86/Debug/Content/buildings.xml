@@ -1,0 +1,115 @@
+<Buildings>
+  <Building Handle="Company">
+    <Name>Company</Name>
+    <Requirements>
+      <Food>3</Food>
+      <Money>100</Money>
+      <Oil>50</Oil>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\company1</Icon>
+    <Size>1x1</Size>
+    <Description>A budding company, swift on their feet and ready to start up a new front in a town just as equally new. Small and home-spun, their family values and mindset keep them looking toward the environment as well as the economy.</Description>
+    <Textures>
+      <Texture X="0" Y="0" Color="0,0,255">graphics\water</Texture>
+    </Textures>
+    <InitiallyAvailable />
+    <Benefits>
+      <Income>10</Income>
+      <Food>20</Food>
+      <Oil>100</Oil>
+      <Electricity>100</Electricity>
+      <Population>20</Population>
+    </Benefits>
+  </Building>
+  <Building Handle="Bank">
+    <Name>Bank</Name>
+    <Requirements>
+      <Food>0</Food>
+      <Money>1000</Money>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\bank1</Icon>
+    <Size>2x2</Size>
+    <Description>A new branch of the bank. Convenient how they come up, isn't it?</Description>
+    <Textures>
+      <Texture X="0" Y="0" Color="0,0,255">graphics\water</Texture>
+      <Texture X="1" Y="0" Color="0,0,255">graphics\water</Texture>
+      <Texture X="0" Y="1" Color="0,0,255">graphics\water</Texture>
+      <Texture X="1" Y="1" Color="0,0,255">graphics\water</Texture>
+    </Textures>
+    <Benefits>
+      <Research>HappyPiggies</Research>
+    </Benefits>
+  </Building>
+  <Building Handle="Factory">
+    <Name>Factory</Name>
+    <Requirements>
+      <Food>10</Food>
+      <Money>550</Money>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\factory1</Icon>
+    <Size>3x2</Size>
+    <Textures>
+      <Texture X="0" Y="0" Color="255,0,0">graphics\water</Texture>
+      <Texture X="1" Y="0" Color="255,0,0">graphics\water</Texture>
+      <Texture X="2" Y="0" Color="255,0,0">graphics\water</Texture>
+      <Texture X="0" Y="1" Color="255,0,0">graphics\water</Texture>
+      <Texture X="1" Y="1" Color="255,0,0">graphics\water</Texture>
+      <Texture X="2" Y="1" Color="255,0,0">graphics\water</Texture>
+    </Textures>
+    <Description>Needing to overcome a great deal of prejudice in their trip into the town, it's been up to resourceful floor managers to promote their image as able to integrate into the town seamlessly. As well as collecting the startup funds, never an easy process.</Description>
+    <Benefits>
+      <Income>0.02</Income>
+    </Benefits>
+  </Building>
+  <Building Handle="Skyscraper">
+    <Name>Skyscraper</Name>
+    <Requirements>
+      <Food>10</Food>
+      <Money>1000</Money>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\skyscraper-icon</Icon>
+    <Size>1x1</Size>
+    <Textures>
+      <Texture X="0" Y="0" Color="128,128,128">buildings\tiles\skyscraper</Texture>
+    </Textures>
+    <Description>It's tall. What do you want?</Description>
+    <Benefits />
+    <InitiallyAvailable />
+  </Building>
+  <Building Handle="Community">
+    <Name>Community</Name>
+    <Requirements>
+      <Food>100</Food>
+      <Money>10000</Money>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\community-icon</Icon>
+    <Size>1x1</Size>
+    <Textures>
+      <Texture X="0" Y="0" Color="255,0,0">buildings\tiles\community</Texture>
+    </Textures>
+    <Description>A thriving community.</Description>
+    <Benefits />
+    <InitiallyAvailable />
+  </Building>
+  <Building Handle="Community2">
+    <Name>Community</Name>
+    <Requirements>
+      <Food>100</Food>
+      <Money>10000</Money>
+      <Terrain>Grass</Terrain>
+    </Requirements>
+    <Icon>buildings\community-icon</Icon>
+    <Size>1x1</Size>
+    <Textures>
+      <Texture X="0" Y="0" Color="255,0,0">buildings\tiles\school1_trans</Texture>
+    </Textures>
+    <Description>A thriving community.</Description>
+    <Benefits />
+    <InitiallyAvailable />
+  </Building>
+</Buildings>

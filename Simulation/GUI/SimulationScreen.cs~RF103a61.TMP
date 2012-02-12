@@ -1,0 +1,207 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace Simulation.GUI
+{
+    public class SimulationScreen : IScreen
+    {
+        private PlayerGame _playerGame;
+        private SimulationScreenMap _currentMap = SimulationScreenMap.Urban;
+        private Dictionary<string, ScreenItem> _screenItems = new Dictionary<string, ScreenItem>();
+        private List<ScreenItem> orderedScreenItems;            
+        private Rectangle mapWindow;
+        private string outputText;
+        private Texture2D interfaceBackground;
+
+        public void Initialize(Game game)
+        {
+            interfaceBackground = game.Content.Load<Texture2D>(@"GUI\interface");
+            mapWindow = new Rectangle(151, 0, game.GraphicsDevice.Viewport.Width - 151,
+                game.GraphicsDevice.Viewport.Height - 133);
+            ScreenItemToggleButton _areaUrban = new ScreenItemToggleButton(game, 5, 
+                game.GraphicsDevice.Viewport.Height - 148, 43, 43, "areaSelection");
+            _areaUrban.Toggled += new EventHandler(areaSelectionToggled);
+            _areaUrban.Value = true;
+            ScreenItemToggleButton _areaCountry = new ScreenItemToggleButton(game, 53,
+                game.GraphicsDevice.Viewport.Height - 148, 43, 43, "areaSelection");
+            _areaCountry.Toggled += new EventHandler(areaSelectionToggled);
+            ScreenItemToggleButton _areaOcean = new ScreenItemToggleButton(game, 101,
+                game.GraphicsDevice.Viewport.Height - 148, 43, 43, "areaSelection");
+            _areaOcean.Toggled += new EventHandler(areaSelectionToggled);
+            _screenItems.Add("areaSelection-Urban", _areaUrban);
+            _screenItems.Add("areaSelection-Country", _areaCountry);
+            _screenItems.Add("areaSelection-Ocean", _areaOcean);
+            _screenItems.Add("areaSelection-Label", new ScreenItemLabel(game, 5, game.GraphicsDevice.Viewport.Height - 168,
+                140, 20, "Areas"));
+
+            ScreenItemWindowButtons closeButton = new ScreenItemWindowButtons(game, GlobalSettings.ScreenWidth - 30, 10);
+            closeButton.OnClick += new EventHandler(openCloseDialog);
+            _screenItems.Add("windowButtons-Close", closeButton);
+
+            ScreenItemProgressBar _ecoHealthBar = new ScreenItemProgressBar(game, 5, 29, 132, 23);
+            _ecoHealthBar.MaxValue = 100;
+            _ecoHealthBar.MinValue = 0;
+            _ecoHealthBar.CurrentValue = 37;
+            _ecoHealthBar.Text = "Eco-health";
+            _screenItems.Add("ecoHealth-Bar", _ecoHealthBar);
+
+            ScreenItemProgressBar _ecoHealthBarTwo = new ScreenItemProgressBar(game, 884, 402, 162, 24);
+            _ecoHealthBarTwo.MaxValue = 100;
+            _ecoHealthBarTwo.MinValue = 0;
+            _ecoHealthBarTwo.CurrentValue = 37;
+            _ecoHealthBarTwo.Text = "Eco-health";
+            _screenItems.Add("ecoHealth2-Bar", _ecoHealthBarTwo);
+
+            ScreenItemList _technologiesList = new ScreenItemList(game, 5, 80, 140, 20, "Technologies");
+            _technologiesList.Items.Add(new ScreenItemListItem("Item 1"));
+            _technologiesList.Items.Add(new ScreenItemListItem("Item 2"));
+            _technologiesList.Items.Add(new ScreenItemListItem("Item 3"));
+            ScreenItemList _buildingsList = new ScreenItemList(game, 5, 120, 140, 20, "Buildings");
+            _buildingsList.Items.Add(new ScreenItemListItem("Building 1"));
+            _buildingsList.Items.Add(new ScreenItemListItem("Building 2"));
+            _buildingsList.Items.Add(new ScreenItemListItem("Building 3"));
+            _buildingsList.ListItemSelected +=new EventHandler<ListItemSelectedEventHandler>(ListItemSelected);
+            _technologiesList.ListItemSelected += new EventHandler<ListItemSelectedEventHandler>(ListItemSelected);
+            _screenItems.Add("technologiesList", _technologiesList);
+            _screenItems.Add("buildingsList", _buildingsList);
+            _screenItems.Add("technologiesList-Label", new ScreenItemLabel(game, 5, 60, 140, 20, "Technologies"));
+            _screenItems.Add("buildingsList-Label", new ScreenItemLabel(game, 5, 100, 140, 20, "Buildings"));
+        }
+
+        void openCloseDialog(object sender, EventArgs e)
+        {
+            if (GlobalSettings.GameplayHalted)
+                return;
+            GlobalSettings.GameplayHalted = true;
+            ScreenItemDialog closeDialog = new ScreenItemDialog(((ScreenItem)sender).Game, 0, 0,
+                GlobalSettings.ScreenWidth, GlobalSettings.ScreenHeight);
+            closeDialog.Layer = 3;
+            closeDialog.Modal = true;
+            _screenItems.Add("closeDialog", closeDialog);
+            //((ScreenItem)sender).Game.Exit();
+        }
+
+        void ListItemSelected(object sender, ListItemSelectedEventHandler e)
+        {
+            outputText = e.Item.Label;
+        }
+
+        void areaSelectionToggled(object sender, EventArgs e)
+        {
+            ScreenItemToggleButton sndr = (ScreenItemToggleButton)sender;
+            if (sndr == _screenItems["areaSelection-Urban"])
+            {
+                _currentMap = SimulationScreenMap.Urban;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Country"]).Value = false;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Ocean"]).Value = false;
+            }
+            else if (sndr == _screenItems["areaSelection-Country"])
+            {
+                _currentMap = SimulationScreenMap.Country;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Urban"]).Value = false;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Ocean"]).Value = false;
+            }
+            else if (sndr == _screenItems["areaSelection-Ocean"])
+            {
+                _currentMap = SimulationScreenMap.Ocean;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Urban"]).Value = false;
+                ((ScreenItemToggleButton)_screenItems["areaSelection-Country"]).Value = false;
+            }
+        }
+
+        public void Update(GameTime gameTime, ref PlayerGame playerGame)
+        {
+            _playerGame = playerGame;
+            orderedScreenItems = _screenItems.Values.OrderBy<ScreenItem, int>(item => item.Layer).ToList<ScreenItem>();
+            bool stillProcessingMouse = true;
+            outputText = "";
+            foreach (ScreenItem screenItem in orderedScreenItems)
+            {
+                if (!GlobalSettings.GameplayHalted && screenItem.Enabled && stillProcessingMouse &&
+                    screenItem.GetMouseOver())
+                {
+                    stillProcessingMouse = !screenItem.ProcessUpdateMouse();
+                    if (!stillProcessingMouse)
+                        outputText = screenItem.ToString();
+                }
+                screenItem.Update(gameTime);
+            }
+
+            Map loadedMap = null;
+            switch (_currentMap)
+            {
+                case SimulationScreenMap.Urban: loadedMap = _playerGame.UrbanMap; break;
+                case SimulationScreenMap.Country: loadedMap = _playerGame.CountryMap; break;
+                case SimulationScreenMap.Ocean: loadedMap = _playerGame.OceanMap; break;
+            }
+            Microsoft.Xna.Framework.Input.KeyboardState _state = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            Vector2 centerTile = loadedMap.CenterTile;
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
+                centerTile.Y--;
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
+                centerTile.Y++;
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
+                centerTile.X--;
+            if (_state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
+                centerTile.X++;
+            if (centerTile.X < 0)
+                centerTile.X = 0;
+            if (centerTile.X >= loadedMap.Width)
+                centerTile.X = loadedMap.Width - 1;
+            if (centerTile.Y < 0)
+                centerTile.Y = 0;
+            if (centerTile.Y >= loadedMap.Height)
+                centerTile.Y = loadedMap.Height - 1;
+            loadedMap.CenterTile = centerTile;
+            loadedMap.Update(gameTime, mapWindow);
+        }
+
+        public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+        {
+            switch (_currentMap)
+            {
+                case SimulationScreenMap.Urban:
+                    graphicsDevice.Clear(_playerGame.UrbanMap.BackgroundColor);
+                    _playerGame.UrbanMap.Draw(gameTime, spriteBatch, mapWindow);
+                    break;
+                case SimulationScreenMap.Country:
+                    graphicsDevice.Clear(_playerGame.CountryMap.BackgroundColor);
+                    _playerGame.CountryMap.Draw(gameTime, spriteBatch, mapWindow);
+                    break;
+                case SimulationScreenMap.Ocean:
+                    graphicsDevice.Clear(_playerGame.OceanMap.BackgroundColor);
+                    _playerGame.OceanMap.Draw(gameTime, spriteBatch, mapWindow);
+                    break;
+            }
+
+            /* Interface/Backdrops */
+            spriteBatch.Draw(interfaceBackground, new Rectangle(0, 0, GlobalSettings.ScreenWidth,
+                GlobalSettings.ScreenHeight), Color.White);
+
+            /* Screen Items */
+            spriteBatch.DrawString(outputText, new Vector2(mapWindow.X + 10, 
+                mapWindow.Y + 10), Color.Black);
+
+            foreach (ScreenItem screenItem in orderedScreenItems)
+                screenItem.Draw(gameTime, spriteBatch);
+
+            /* Gameplay halted? Process */
+            /*if (GlobalSettings.GameplayHalted)
+            {
+                spriteBatch.FillRectangle(0, 0, GlobalSettings.ScreenWidth, GlobalSettings.ScreenHeight,
+                    new Color(Color.WhiteSmoke, 175));
+            }*/
+        }
+    }
+
+    public enum SimulationScreenMap
+    {
+        Urban,
+        Country,
+        Ocean
+    }
+}

@@ -1,0 +1,23 @@
+<ResearchLabs>
+  <Research Handle="SolarPanels">
+    <Name>Solar Panels</Name>
+    <MonetaryCost>1000</MonetaryCost>
+    <Duration>5.05</Duration>
+    <Description>Solar panels convert solar energy into electrical energy.</Description>
+    <Icon>research\lightbulb</Icon>
+    <Benefits>
+      <Buildings>Bank</Buildings>
+    </Benefits>
+    <InitiallyAvailable />
+  </Research>
+  <Research Handle="HappyPiggies">
+    <Name>Happy Piggies</Name>
+    <MonetaryCost>0</MonetaryCost>
+    <Duration>20</Duration>
+    <Description>Happy piggybanks mean happy money.</Description>
+    <Icon>research\happy_piggies</Icon>
+    <Benefits>
+      <Income Repeatable="True">2</Income>
+    </Benefits>
+  </Research>
+</ResearchLabs>
